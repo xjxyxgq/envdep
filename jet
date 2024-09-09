@@ -1,0 +1,110 @@
+#!/bin/bash
+
+# 定义字母的ASCII图案
+N=(
+" ██  ██ "
+" ███ ██ "
+" ██ ███ "
+" ██  ██ "
+" ██  ██ "
+)
+
+U=(
+" ██  ██ "
+" ██  ██ "
+" ██  ██ "
+" ██  ██ "
+"  ████  "
+)
+
+D=(
+" █████  "
+" ██  ██ "
+" ██  ██ "
+" ██  ██ "
+" █████  "
+)
+
+B=(
+" █████  "
+" ██  ██ "
+" █████  "
+" ██  ██ "
+" █████  "
+)
+
+# 将图案放入字母表中
+letters=("N" "U" "D" "B")
+
+# 定义颜色的 ANSI 转义序列
+colors=(
+    "\033[91m"  # 红色
+    "\033[92m"  # 绿色
+    "\033[93m"  # 黄色
+    "\033[94m"  # 蓝色
+    "\033[95m"  # 紫色
+    "\033[96m"  # 青色
+    "\033[97m"  # 白色
+    "\033[90m"  # 灰色
+)
+
+# 重置颜色
+reset_color="\033[0m"
+
+# 版本号
+version="v2.1.3"
+
+# 输出图案
+render_frame() {
+    local color="$1"
+    clear
+
+    # 定义边框字符
+    horizontal_border="-"
+    vertical_border="|"
+    corner_char="+"
+
+    # 计算边框的宽度
+    letter_width=7  # 每个字母现在占 7 列
+    spacing=1
+    num_letters=4
+    inner_width=$((num_letters * (letter_width + spacing) - spacing))  # 内部宽度不含边框
+    total_width=$((inner_width + 2))  # 包括左右边框的总宽度
+
+    # 输出顶部边框，确保与其他行对齐
+    echo -e "${color}${corner_char}$(printf "%.0s${horizontal_border}" $(seq 1 $inner_width))${corner_char}${reset_color}"
+
+    for ((i = 0; i < 5; i++)); do
+        line=" "  # 每行的开始（不包含左边框）
+        for letter in {0..3}; do
+            # 用对应字母填充图案
+            case ${letters[$letter]} in
+                "N") line+="${N[i]} " ;;
+                "U") line+="${U[i]} " ;;
+                "D") line+="${D[i]} " ;;
+                "B") line+="${B[i]} " ;;
+            esac
+        done
+        line="${line% }"  # 移除每行末尾多余的空格
+        # 使用echo -e确保颜色转义序列被正确解释
+        echo -e "${color}${vertical_border}${line}${vertical_border}${reset_color}"
+    done
+
+    # 输出底部边框并居中显示版本号
+    version_padding=$(( (inner_width - ${#version}) / 2 ))
+    version_line="${horizontal_border}$(printf "%.0s${horizontal_border}" $(seq 1 $version_padding))${version}$(printf "%.0s${horizontal_border}" $(seq 1 $((inner_width - version_padding - ${#version}))))"
+    echo -e "${color}${corner_char}${version_line}${corner_char}${reset_color}"
+}
+
+# 动画循环
+while true; do
+    color="${colors[RANDOM % ${#colors[@]}]}"  # 随机选择一种颜色
+    render_frame "$color"
+    sleep 3
+done
+
+function main() {
+    echo "Hello, World!"
+}
+
+main
